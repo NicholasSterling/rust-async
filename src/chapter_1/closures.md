@@ -2,13 +2,13 @@
 
 While iterators are pretty straightforward both from a usage and an implementation standpoint, closures are anything but.  
 In fact, I'd argue they're one of the most complex pieces of "standard" synchronous Rust.  
-Their very expressive nature, thanks to a lot of magical sugar exposed by the compiler, make them a prime tool to push the type system into very complex corners, whether voluntarily.. or not.
+Their very expressive nature, thanks to a lot of magical sugar exposed by the compiler, makes them a prime tool to push the type system into very complex corners, whether voluntarily...or not.
 
-Closures also happen to be the cornerstone of any serious asynchronous codebase, where their incidental complexity tends to skyrocket as a multitude of issues specific to asynchronous & multi-threaded code join in on the party.
+Closures also happen to be the cornerstone of any serious asynchronous codebase, where their incidental complexity tends to skyrocket as a multitude of issues specific to asynchronous and multi-threaded code join the party.
 
 ### 1.2.a. A better `Bounds`
 
-We'll kick off this section by turning our `Bounds` filter into a filter of.. well, anything, really:
+We'll kick off this section by turning our `Bounds` filter into a filter of...well, anything, really:
 ```rust
 {{#include ../../examples/chapter_1/src/lib.rs:filter}}
 ```
@@ -22,7 +22,7 @@ Lo and behold:
 ```
 Yep, that does it.
 
-So that's nice and all but.. how does our final state-machine ends up being implemented?
+So that's nice and all, but... how does our final state machine end up being implemented?
 ```sh
 $ cargo rustc --lib -- --test -Zprint-type-sizes
 # [...]
@@ -31,7 +31,7 @@ $ cargo rustc --lib -- --test -Zprint-type-sizes
 ```
 Wait, wat? How come a monomorphized `Filter<Range<usize>, <[closure]>>` is the same size as a `Range<usize>`?
 
-The only way this is possible is if storing our closure costs a whopping 0 byte which.. doesn't seem plausible?  
+The only way this is possible is if storing our closure costs a whopping 0 bytes which...doesn't seem plausible?
 Let's take a minute to try and understand what's going on here.
 
 ### 1.2.b. What's a closure, anyway?
@@ -56,7 +56,7 @@ For that reason, every closure has a different type (!), and every closure requi
 Obviously, having to manually declare a proper definition for your closure's captured state every time would be way too cumbersome, to the point of rendering closures completely useless.
 
 To cope with that, the compiler automatically generates an appropriate anonymous structure every time you create a closure.  
-Consider e.g. the following code:
+Consider, for example, the following code:
 ```rust
 let a = 42;
 let b = 100;
@@ -83,7 +83,7 @@ struct __anonymous_e3b0105 {
     b: i32,
 }
 ```
-Don't take my word for it, ask the compiler:
+Don't take my word for it; ask the compiler:
 ```sh
 $ cargo rustc --lib -- --test -Zprint-type-sizes
 # [...]
@@ -141,12 +141,12 @@ And so is this one:
 {{#include ../../examples/chapter_1/src/lib.rs:test_handmade_decl}}
 {{#include ../../examples/chapter_1/src/lib.rs:test_handmade_native_move}}
 ```
-It doesn't matter that the second closure moves `a` & `b` into its state (well it certainly matters to the enclosing scope, which can't refer to these variables anymore, but that's besides the point).
+It doesn't matter that the second closure moves `a` & `b` into its state (well, it certainly matters to the enclosing scope, which can't refer to these variables anymore, but that's beside the point).
 
 What matters is how the closure interacts with its state when it gets called.  
 In the example above, that interaction is just a read through a reference, and so a shared reference to the state (i.e. `&self`) is enough to perform the call: the compiler makes sure that this closure is `Fn`.
 
-Now if you were to do this on the other hand..:
+Now if you were to do this, on the other hand:
 ```rust
 {{#include ../../examples/chapter_1/src/lib.rs:test_handmade_illegal}}
 ```
@@ -256,7 +256,7 @@ Effectively, it is just a plain function pointer:
 {{#include ../../examples/chapter_1/src/lib.rs:test_empty_closure}}
 ```
 
-That explains why our closure is 0 byte, but it certainly doesn't explain why a `Filter<Range<usize>, [closure]>` is the same size as a `Range<usize>`. Even if the closure itself is 0 byte, `Filter` still has has to hold a function pointer to the code portion of the closure, which is 8 bytes on a 64bit platform such as mine.  
+That explains why our closure is 0 byte, but it certainly doesn't explain why a `Filter<Range<usize>, [closure]>` is the same size as a `Range<usize>`. Even if the closure itself is 0-byte, `Filter` still has has to hold a function pointer to the code portion of the closure, which is 8 bytes on a 64-bit platform such as mine.  
 What are we missing?
 
 Consider the following code where we instantiate a `Filter` using an empty closure (i.e. an anonymous function):
@@ -282,9 +282,9 @@ movq    88(%rsp), %rsi
 callq   closure_filters::empty_closure::{{closure}}
 movb    %al, 31(%rsp)
 ```
-Don't worry too much about all these `mov` instructions for now, the only relevant piece of information is in fact written in plain english: `callq closure_filters::empty_closure::{{closure}}`.  
-The compiler has completely optimized out the indirect call through `self.predicate`: the address of the closure is hardcoded right there into the `.next` method!  
-We have monomorphization to thank for that, it generated a `.next` function specialized for `I = Range<usize>` and `P = [closure]`, where `[closure]` denotes the unique, anonymous type of our closure (remember, _each and every_ closure gets its own anonymous type).  
+Don't worry too much about all these `mov` instructions for now. The only relevant piece of information is in fact written in plain english: `callq closure_filters::empty_closure::{{closure}}`.  
+The compiler has completely optimized out the indirect call through `self.predicate`: the address of the closure is hard-coded right there into the `.next` method!  
+We have monomorphization to thank for that; it generated a `.next` function specialized for `I = Range<usize>` and `P = [closure]`, where `[closure]` denotes the unique, anonymous type of our closure (remember, _each and every_ closure gets its own anonymous type).  
 Since `self.predicate` is a `P`, and the compiler knows that `P` is nothing but a function pointer (i.e. `P: FnMut`), it therefore knows that it can eliminate the runtime dispatch in favor of what we're seeing here.
 
 What if our closure _did_ capture some state, then?
@@ -335,12 +335,12 @@ The attentive reader shall notice the two extra instructions this time: the comp
 
 ### 1.2.c. Usual complications
 
-When working in single-threaded environments, closures are usually a breathe to work with. The compiler gets to do its magic and you rarely seem to get into trouble, if at all.  
+When working in single-threaded environments, closures are usually a breeze to work with. The compiler gets to do its magic and you rarely seem to get into trouble, if at all.  
 Once we get into async code, though, some concepts that are usually mostly invisible will start becoming very apparent as Rust compile-time safeties start kicking in.
 
-**Higher Ranked Trait Bounds**
+**Higher-Ranked Trait Bounds**
 
-The first complication that I want to mention has nothing to do with neither multi-threading nor asynchronous code, but you're bound to face it at one point or another if you start digging into any closure-heavy codebase (which is true of any async codebase, so..), so I'd rather mention it in passing.
+The first complication that I want to mention has nothing to do with either multi-threading or asynchronous code, but you're bound to face it at one point or another if you start digging into any closure-heavy codebase (which is true of any async codebase, so...), so I'd rather mention it in passing.
 
 TL;DR, you _will_ encounter this syntax at one point or another:
 ```rust
@@ -349,13 +349,13 @@ fn my_func<F: for<'a> Fn(&'a str) -> bool>(f: F) -> bool { /* ... */ }
 ```
 which is meant to denote the higher-kindness of a lifetime trait bound, meaning that `&str` cannot outlive `'a`, where `'a` is _any_ lifetime, i.e. it is left unconstrained.
 
-While I would love to talk about Generic Associated Types, Higher Ranked Types/Lifetimes and all that fun at some point, now is nor the time nor the place.  
+While I would love to talk about Generic Associated Types, Higher-Ranked Types/Lifetimes and all that fun at some point, now is neither the time nor the place.  
 For now, just keep in mind that this syntax exists, that you will most likely encouter it at some point, and that you'll find all the information you'll ever need in [the original RFC](https://rust-lang.github.io/rfcs/0387-higher-ranked-trait-bounds.html) as well as in [the corresponding nomicon entry](https://doc.rust-lang.org/nomicon/hrtb.html).
 
 **Auto marker traits and inferred lifetimes**
 
 Always keep in mind that closures are just structures, and thus the usual rules regarding compound types and auto & marker traits as well as lifetimes apply.  
-I.e. the lifetime and intrinsic properties of a state-machine built up from the combination of iterators and closures will be a direct result of both its explicitly _and_ implicitly captured enviroments.
+I.e. the lifetime and intrinsic properties of a state machine built up from the combination of iterators and closures will be a direct result of both its explicitly _and_ implicitly captured enviroments.
 
 Consider our `Filter` combinator, for example:
 ```rust
@@ -368,11 +368,11 @@ assert_eq!(Some(7), it.next());
 assert_eq!(None, it.next());
 ```
 
-In this case, the resulting state-machine's (`it`) lifetime is bounded by the lifetimes of `min` & `max`.  
+In this case, the resulting state machine's (`it`) lifetime is bounded by the lifetimes of `min` & `max`.  
 Similarly, whether `it` can or cannot be moved between threads (i.e. `Send`) depends on whether `min` & `max` can be sent between threads.
 
-Obviously, in a state-machine as simple as this one, this won't ever cause you any trouble.  
-In a massive asynchronous state-machine, built-up from many many parts (that may even cross module boundaries), and that will be arbitrarily moved back and forth between threads by some executor that you might or might not control, on the other hand... Let's just say that it can be easy to lose track of who requires what and for how long.  
+Obviously, in a state machine as simple as this one, this won't ever cause you any trouble.  
+In a massive asynchronous state machine, built up from many, many parts (that may even cross module boundaries), and that will be arbitrarily moved back and forth between threads by some executor that you might or might not control, on the other hand... Let's just say that it can be easy to lose track of who requires what and for how long.  
 
 But, hey, that's precisely why we're using Rust in the first place!  
 Compiler errors for these hard cases have become insanely good too, if quite verbose.

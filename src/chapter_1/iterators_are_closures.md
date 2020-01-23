@@ -3,8 +3,8 @@
 _And now for the fun part._
 
 Let's recap the first two sections of this chapter, in as many sentences:
-- Iterators are state-machines that are implemented using a structure to keep their state and a `.next()` method that takes a mutable reference to said state (`&mut self`) in order to move the machine forward.
-- Closures are state-machines that are implemented using a structure to hold their state (i.e. their captured environment) and a `call_once`/`call_mut`/`call` method that takes said state by move/mutable reference/shared reference (respectively) in order to drive the machine forward.
+- Iterators are state machines that are implemented using a structure to keep their state and a `.next()` method that takes a mutable reference to said state (`&mut self`) in order to move the machine forward.
+- Closures are state machines that are implemented using a structure to hold their state (i.e. their captured environment) and a `call_once`/`call_mut`/`call` method that takes said state by move/mutable reference/shared reference (respectively) in order to drive the machine forward.
 
 If you're thinking to yourself that these two sound similar, that's because they are.  
 In this section we're going to have us a little fun by digressing into these similarities.
@@ -38,7 +38,7 @@ Remember our `Range` iterator could be combined with a `Bounds` iterator, allowi
 {{#include ../../examples/chapter_1/src/lib.rs:test_bounds}}
 ```
 
-We can apply the same pattern to closures: by moving ownership of the wrappee inside the state of the wrapper, we can delegate the state-machinery from the wrapper and into the wrappee.
+We can apply the same pattern to closures: by moving ownership of the wrappee inside the state of the wrapper, we can delegate the state machinery from the wrapper and into the wrappee.
 ```rust
 {{#include ../../examples/chapter_1/src/lib.rs:bounds_closure}}
 ```
